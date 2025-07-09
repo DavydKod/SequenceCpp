@@ -1,0 +1,37 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.vcxproj.user
+
+# Build results
+*.obj
+*.exe
+*.log
+*.pdb
+*.ilk
+*.ipch
+*.aps
+
+# Others
+*.cache
+*.db
+*.opendb
+*.VC.db
+
+# CMake (якщо використовуєш)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Temporary
+*.tmp
+*.log
+
+# Debug
+*.tlog
+
+# Others
+*.sdf
+*.sln.docstates
