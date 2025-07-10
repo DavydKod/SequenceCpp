@@ -127,11 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Sequence.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="tests\main_test.cpp" />
+    <ClCompile Include="tests\test_sequence\basic_sequence_test.cpp" />
+    <ClCompile Include="tests\test_sequence\main_sequence_test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Sequence.h" />
+    <ClInclude Include="include\Sequence.h" />
+    <ClInclude Include="tests\run_tests.h" />
+    <ClInclude Include="tests\test_sequence\test_sequence.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
