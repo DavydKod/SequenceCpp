@@ -35,8 +35,9 @@ public:
 	void print() const;
 
 	type& operator[] (int index);
-	Sequence<type>& operator=(const Sequence<type>& other);
 	const type& operator[] (int index) const;
+	Sequence<type>& operator=(const Sequence<type>& other);
+	
 };
 
 
@@ -290,14 +291,15 @@ Sequence<type>& Sequence<type>::changeAll(const type& previousValue, const type&
 			changeAt(i, nextValue);
 		}
 	}
+	return *this;
 }
 
 template <class type>
 void Sequence<type>::print() const {
-	std::cout << "Sequence (capacity = " + capacity + ", size = " + size + "): ";
+	std::cout << "Sequence (capacity = " << capacity << ", size = " << size << "): ";
 	for (int i = 0; i < size; i++)
 	{
-		std::cout << elements[i];
+		std::cout << elements[i] << " ";
 	}
 	std::cout << std::endl;
 }

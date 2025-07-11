@@ -1,5 +1,9 @@
-void test_basics();
+int testBasics();
+int testOperators();
 
-void testSequence() {
-	test_basics();
+int testSequence() {
+	int passedTests = 0;
+	passedTests += testBasics();
+	passedTests += testOperators();
+	return passedTests;
 }

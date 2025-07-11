@@ -28,6 +28,9 @@
     <ClCompile Include="tests\main_test.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\test_sequence\operator_sequence_test.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Sequence.h">
