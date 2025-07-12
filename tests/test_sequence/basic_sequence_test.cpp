@@ -26,7 +26,7 @@ void testEmpty() {
 	assert(!seq.isEmpty());
 	seq.clear();
 	assert(seq.isEmpty());
-	
+
 	passedTestsCounter++;
 }
 
@@ -38,7 +38,7 @@ void testPushingPopping() {
 	assert(seq[3] == 23);
 	seq.pop_back().push_back(234);
 	assert(seq[3] == 234);
-	
+
 	passedTestsCounter++;
 }
 
@@ -256,6 +256,29 @@ void testCopying() {
 	passedTestsCounter++;
 }
 
+void testConstObjects() {
+	const Sequence<bool> seq(new bool[]{true, false}, 2, 10);
+	assert(seq.getCapacity() == 10);
+	assert(seq.getSize() == 2);
+	assert(seq[0] == true && seq[1] == false);
+	assert(!seq.isEmpty());
+	assert(seq.contains(true));
+	assert(seq.containsLotsOf(false) == 1);
+
+	std::stringstream buffer;
+	std::streambuf* oldCoutBuffer = std::cout.rdbuf(buffer.rdbuf());
+
+	seq.print();
+
+	std::cout.rdbuf(oldCoutBuffer);
+
+	std::string output = buffer.str();
+
+	assert(output == "Sequence (capacity = 10, size = 2): 1 0 \n");
+
+	++passedTestsCounter;
+}
+
 int testBasics() {
 	testCreation();
 	testEmpty();
@@ -271,5 +294,6 @@ int testBasics() {
 	testInserting();
 	testRemoving();
 	testCopying();
+	testConstObjects();
 	return passedTestsCounter;
 }
