@@ -279,6 +279,21 @@ void testConstObjects() {
 	++passedTestsCounter;
 }
 
+void testSwap() {
+	Sequence<int> seq(10);
+	seq.push_back(2).push_back(42).push_back(1).push_back(87);
+	Sequence<int> sequence(15);
+	sequence.push_back(5).push_back(12).push_back(654).push_back(23).push_back(234);
+
+	seq.swap(sequence);
+
+	assert(seq.getSize() == 5 && sequence.getSize() == 4);
+	assert(seq.getCapacity() == 15 && sequence.getCapacity() == 10);
+	assert(seq[0] == 5 && sequence[2] == 1 && seq[4] == 234);
+
+	++passedTestsCounter;
+}
+
 int testBasics() {
 	testCreation();
 	testEmpty();
@@ -295,5 +310,6 @@ int testBasics() {
 	testRemoving();
 	testCopying();
 	testConstObjects();
+	testSwap();
 	return passedTestsCounter;
 }

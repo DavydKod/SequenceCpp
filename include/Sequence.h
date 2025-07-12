@@ -33,11 +33,13 @@ public:
 	Sequence<type>& removeAt(int index);
 	Sequence<type>& removeAll(const type& value);
 	void print() const;
+	void swap(Sequence<type>&);
 
 	type& operator[] (int index);
 	const type& operator[] (int index) const;
 	Sequence<type>& operator=(const Sequence<type>& other);
-	
+	bool operator==(const Sequence<type>&) const;
+	bool operator!=(const Sequence<type>&) const;
 };
 
 
@@ -306,5 +308,53 @@ void Sequence<type>::print() const {
 	}
 	std::cout << std::endl;
 }
+
+template<class type>
+std::ostream& operator<<(std::ostream& os, const Sequence<type>& sequence) {
+	os << "Sequence (capacity = " << sequence.getCapacity() << ", size = " << sequence.getSize() << "): ";
+	for (int i = 0; i < sequence.getSize(); i++)
+	{
+		os << sequence[i] << " ";
+	}
+	os << std::endl;
+	
+	return os;
+}
+
+template<class type>
+bool Sequence<type>::operator==(const Sequence<type>& seq) const {
+	if (getSize() != seq.getSize())
+	{
+		return false;
+	}
+	for (int i = 0; i < getSize(); ++i) {
+		if ((*this)[i] != seq[i])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+template<class type>
+bool Sequence<type>::operator!=(const Sequence<type>& seq) const {
+	return !(*this == seq);
+}
+
+template <class type>
+void Sequence<type>::swap(Sequence<type>& other) {
+	int savedSize = getSize();
+	size = other.getSize();
+	other.size = savedSize;
+
+	int savedCapacity = getCapacity();
+	capacity = other.getCapacity();
+	other.capacity = savedCapacity;
+
+	type* savedElements = elements;
+	elements = other.elements;
+	other.elements = savedElements;
+}
+
 
 #endif

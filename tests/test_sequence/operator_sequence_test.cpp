@@ -1,5 +1,6 @@
 #include "../../include/Sequence.h"
 #include "cassert"
+#include <sstream>
 
 static int passedTestsCounter = 0;
 
@@ -72,8 +73,57 @@ void testAssignmentOperator() {
 	++passedTestsCounter;
 }
 
+void testOutputOperator() {
+	Sequence<int> seq(10);
+	seq.push_back(2).push_back(42).push_back(1).push_back(87);
+
+	Sequence<int> sequence(15);
+	sequence.push_back(5).push_back(12).push_back(654).push_back(23).push_back(234);
+
+	std::stringstream buffer;
+	std::streambuf* oldCoutBuffer = std::cout.rdbuf(buffer.rdbuf());
+
+	std::cout << seq << sequence;
+
+	std::cout.rdbuf(oldCoutBuffer);
+
+	std::string output = buffer.str();
+
+	assert(output == "Sequence (capacity = 10, size = 4): 2 42 1 87 \nSequence (capacity = 15, size = 5): 5 12 654 23 234 \n");
+
+	++passedTestsCounter;
+}
+
+void testComparisonOperator() {
+	Sequence<int> seq(10);
+	seq.push_back(2).push_back(42).push_back(1).push_back(87);
+	Sequence<int> sequence(15);
+	sequence.push_back(5).push_back(12).push_back(654).push_back(23).push_back(234);
+
+	assert(seq != sequence);
+	assert(!(seq == sequence));
+
+	seq = sequence;
+	assert(seq == sequence);
+	assert(!(seq != sequence));
+
+	seq.clear();
+
+	assert(seq != sequence);
+	assert(!(seq == sequence));
+
+	sequence.clear();
+
+	assert(seq == sequence);
+	assert(!(seq != sequence));
+
+	++passedTestsCounter;
+}
+
 int testOperators() {
 	testIndexOperator();
 	testAssignmentOperator();
+	testOutputOperator();
+	testComparisonOperator();
 	return passedTestsCounter;
 }

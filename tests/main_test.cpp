@@ -11,5 +11,5 @@ void mainTesting() {
 	int passedTests = 0;
 	passedTests += testSequence();
 
-	std::cerr << MAGENTA << "ALL " << CYAN << passedTests << GREEN << " PASSED" << RESET << std::endl;
+	std::cerr << MAGENTA << "ALL " << CYAN << passedTests << " TESTS" << GREEN << " PASSED" << RESET << std::endl;
 }
