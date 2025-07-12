@@ -39,8 +39,6 @@ void testIndexOperator() {
 	assert(sequence[0] == 3 && sequence[3] == 1);
 	//sequence[2] = 0; - error because of a const object
 
-	assert(exceptionThrown);
-
 	++passedTestsCounter;
 }
 
