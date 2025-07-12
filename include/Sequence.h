@@ -29,9 +29,9 @@ public:
 	Sequence<type>& pop_back();
 	Sequence<type>& insertAt(int index, const type& value);
 	Sequence<type>& changeAt(int index, const type& value);
+	Sequence<type>& changeAll(const type& previousValue, const type& nextValue);
 	Sequence<type>& removeAt(int index);
 	Sequence<type>& removeAll(const type& value);
-	Sequence<type>& changeAll(const type& previousValue, const type& nextValue);
 	void print() const;
 
 	type& operator[] (int index);
@@ -239,7 +239,8 @@ Sequence<type>& Sequence<type>::insertAt(int index, const type& value) {
 		resize(capacity + 100);
 	}
 	size++;
-	for (int i = size - 1; i > index; i++)
+
+	for (int i = size - 1; i > index; i--)
 	{
 		elements[i] = elements[i - 1];
 	}
@@ -276,10 +277,12 @@ Sequence<type>& Sequence<type>::removeAll(const type& value) {
 	{
 		if (elements[i] == value)
 		{
-			removeAt[i];
+			removeAt(i);
 			i--;
 		}
 	}
+
+	return *this;
 }
 
 template <class type>

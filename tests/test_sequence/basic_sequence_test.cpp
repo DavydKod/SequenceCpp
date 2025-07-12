@@ -11,6 +11,11 @@ void testCreation() {
 	Sequence<double> sequence(50);
 	assert(sequence.getCapacity() == 50);
 	assert(sequence.getSize() == 0);
+	int* elements = new int[] {1, 2, 3, 4, 5};
+	Sequence<int> s(elements, 5, 2);
+	assert(s.getCapacity() == 2 && s.getSize() == 2);
+	assert(s[0] == 1 && s[1] == 2);
+
 	passedTestsCounter++;
 }
 
@@ -21,6 +26,7 @@ void testEmpty() {
 	assert(!seq.isEmpty());
 	seq.clear();
 	assert(seq.isEmpty());
+	
 	passedTestsCounter++;
 }
 
@@ -32,9 +38,7 @@ void testPushingPopping() {
 	assert(seq[3] == 23);
 	seq.pop_back().push_back(234);
 	assert(seq[3] == 234);
-	//TODO something is incorrect with insert or remove method
-	//seq.push_back(34).insertAt(1, 35).removeAt(3);
-	//assert(seq[1] == 35 && seq.getSize() == 4);
+	
 	passedTestsCounter++;
 }
 
@@ -188,19 +192,66 @@ void testReserving() {
 }
 
 void testInserting() {
-
+	Sequence<int> seq(10);
+	seq.push_back(7).push_back(12).push_back(654).push_back(23).push_back(234).push_back(5).push_back(4).push_back(5);
+	seq.insertAt(0, 47);
+	assert(seq[0] == 47);
+	assert(seq[1] == 7);
+	assert(seq[2] == 12);
+	assert(seq.getSize() == 9);
+	assert(seq[8] == 5);
+	seq.insertAt(4, 89);
+	assert(seq[4] == 89);
+	assert(seq[5] == 23);
+	seq.insertAt(6, 1);
+	assert(seq.getCapacity() == 110);
+	seq.insertAt(-57, 58);
+	assert(seq[0] == 58);
+	assert(seq[1] == 47);
+	seq.insertAt(254, 98);
+	assert(seq[12] == 98);
+	assert(seq.getCapacity() == 110);
+	assert(seq.getSize() == 13);
+	seq.clear();
+	seq.insertAt(645, 2);
+	assert(seq[0] == 2);
+	assert(seq.getSize() == 1);
 
 	passedTestsCounter++;
 }
 
 void testRemoving() {
+	Sequence<int> seq(10);
+	seq.push_back(7).push_back(12).push_back(654).push_back(23).push_back(234).push_back(5).push_back(4).push_back(5);
+	seq.removeAt(0);
+	assert(seq[0] == 12);
+	assert(seq.getSize() == 7);
+	seq.removeAt(4);
+	assert(seq[3] == 234);
+	assert(seq[4] == 4);
+	assert(seq[5] == 5);
 
+	seq.insertAt(2, 5).push_back(5).insertAt(0, 5);
+	seq.removeAll(5).removeAll(654).removeAll(2).removeAll(4);
+	assert(seq[0] == 12 && seq[1] == 23 && seq[2] == 234 && seq.getSize() == 3);
+	seq.removeAt(-6).removeAt(87);
+	assert(seq[0] == 23 && seq.getSize() == 1);
+	seq.removeAll(23).removeAt(0);
 
 	passedTestsCounter++;
 }
 
 void testCopying() {
+	Sequence<int> seq(10);
+	seq.push_back(7).push_back(12).push_back(654).push_back(23).push_back(234).push_back(5).push_back(4).push_back(5);
 
+	Sequence<int> sequence(seq);
+	assert(sequence[0] == seq[0] && sequence[6] == seq[6] && sequence.getSize() == seq.getSize()
+		&& sequence.getCapacity() == seq.getCapacity());
+	seq.insertAt(0, 45);
+	assert(sequence.getSize() != seq.getSize() && sequence[0] != seq[0] && sequence.getCapacity() == seq.getCapacity());
+	sequence.reserve(13);
+	assert(sequence.getCapacity() != seq.getCapacity());
 
 	passedTestsCounter++;
 }
