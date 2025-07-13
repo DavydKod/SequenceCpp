@@ -11,15 +11,15 @@ private:
 	int capacity;
 	type* elements = nullptr;
 public:
-	Sequence(int capacity = 100);
-	Sequence(const type* elems, const int size, int capacity = 100);
+	Sequence(int capacity = 100) noexcept;
+	Sequence(const type* elems, const int size, int capacity = 100) noexcept;
 	Sequence(const Sequence<type>& other);
 	~Sequence();
 
-	int getSize() const;
-	int getCapacity() const;
-	bool isEmpty() const;
-	void clear();
+	int getSize() const noexcept;
+	int getCapacity() const noexcept;
+	bool isEmpty() const noexcept;
+	void clear() noexcept;
 	bool contains(const type& value) const;
 	size_t containsLotsOf(const type& value) const;
 	void resize(int newCapacity);
@@ -46,7 +46,7 @@ public:
 #include "../include/Sequence.h"
 
 template <class type>
-Sequence<type>::Sequence(const type* elems, const int size, int capacity) : capacity(capacity) {
+Sequence<type>::Sequence(const type* elems, const int size, int capacity) noexcept : capacity(capacity) {
 	elements = new type[capacity];
 
 	int count = (size < capacity) ? size : capacity;
@@ -59,7 +59,7 @@ Sequence<type>::Sequence(const type* elems, const int size, int capacity) : capa
 }
 
 template <class type>
-Sequence<type>::Sequence(int capacity) : capacity(capacity), size(0) {
+Sequence<type>::Sequence(int capacity) noexcept : capacity(capacity), size(0) {
 	elements = new type[capacity];
 }
 
@@ -69,12 +69,12 @@ Sequence<type>::~Sequence() {
 }
 
 template <class type>
-int Sequence<type>::getSize() const {
+int Sequence<type>::getSize() const noexcept {
 	return size;
 }
 
 template <class type>
-int Sequence<type>::getCapacity() const {
+int Sequence<type>::getCapacity() const noexcept {
 	return capacity;
 }
 
@@ -105,12 +105,12 @@ Sequence<type>& Sequence<type>::push_back(const type& value) {
 }
 
 template <class type>
-bool Sequence<type>::isEmpty() const {
+bool Sequence<type>::isEmpty() const noexcept {
 	return size == 0;
 }
 
 template <class type>
-void Sequence<type>::clear() {
+void Sequence<type>::clear() noexcept {
 	size = 0;
 }
 
