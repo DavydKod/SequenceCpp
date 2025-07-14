@@ -350,6 +350,27 @@ void testMoveSemantics() {
 	seq = MoveSequenceThroughReturn(std::move(seq));
 }
 
+void testPushingArray() {
+	Sequence<bool> seq(3);
+	seq.push_back(false).push_back(true);
+	Sequence<bool> addedSeq;
+	addedSeq.push_back(true).push_back(false);
+
+	seq.push_back(addedSeq);
+	assert(seq.getCapacity() == 104 && seq.getSize() == 4);
+	assert(seq.at(0) == false && seq.at(1) == true && seq.at(2) == true && seq.at(3) == false);
+
+	seq.push_back(new bool[] {true, false, false}, 3);
+	assert(seq.getCapacity() == 104 && seq.getSize() == 7);
+	assert(seq.at(4) == true && seq.at(5) == false && seq.at(6) == false);
+	
+	addedSeq.push_back(seq);
+	seq.push_back(addedSeq);
+	seq.push_back(seq).push_back(seq);
+	seq.push_back(seq);
+	assert(seq.getSize() == 128 && seq.getCapacity() == 228);
+}
+
 size_t testBasics() {
 	size_t passedTests = 0;
 
@@ -371,6 +392,7 @@ size_t testBasics() {
 	runTest(testSwap, passedTests);
 	runTest(testGetting, passedTests);
 	runTest(testMoveSemantics, passedTests);
+	runTest(testPushingArray, passedTests);
 
 	return passedTests;
 }

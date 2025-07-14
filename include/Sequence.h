@@ -27,12 +27,15 @@ public:
 	void reserve(size_t newBiggerCapacity);
 	void shrink_to_fit();
 	Sequence<type>& push_back(const type&);
+	Sequence<type>& push_back(const Sequence<type>&);
+	Sequence<type>& push_back(const type*, size_t);
 	Sequence<type>& pop_back() noexcept;
 	Sequence<type>& insertAt(size_t index, const type& value);
 	Sequence<type>& changeAt(size_t index, const type& value);
 	Sequence<type>& changeAll(const type& previousValue, const type& nextValue);
 	Sequence<type>& removeAt(size_t);
 	Sequence<type>& removeAll(const type&);
+	Sequence<type>& concat(const Sequence<type>&);
 	[[nodiscard]] type& at(size_t);
 	[[nodiscard]] const type& at(size_t) const;
 	void print() const;
@@ -42,6 +45,8 @@ public:
 	[[nodiscard]] const type& operator[] (size_t) const;
 	Sequence<type>& operator=(const Sequence<type>&);
 	Sequence<type>& operator=(Sequence<type>&&) noexcept;
+	Sequence<type>& operator+=(const Sequence<type>&);
+
 	[[nodiscard]] bool operator==(const Sequence<type>&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 	[[nodiscard]] bool operator!=(const Sequence<type>&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 };
@@ -325,7 +330,7 @@ std::ostream& operator<<(std::ostream& os, const Sequence<type>& sequence) {
 template<class type>
 std::istream& operator>>(std::istream& is, Sequence<type>& seq) {
 	size_t n;
-	is >> n; 
+	is >> n;
 	if (!is) return is;
 
 	seq.clear();
@@ -386,6 +391,46 @@ Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), s
 	other.elements = nullptr;
 	other.size = 0;
 	other.capacity = 0;
+}
+
+template <class type>
+Sequence<type>& Sequence<type>::push_back(const Sequence<type>& other) {
+	size_t otherSize = other.size;
+	reserve((size + other.size >= capacity) ? size + other.size + 100 : size + other.size);
+
+	for (size_t i = 0; i < otherSize; ++i) {
+		elements[size++] = other.elements[i];
+	}
+	
+	return *this;
+}
+
+template <class type>
+Sequence<type>& Sequence<type>::push_back(const type* array, size_t arraySize) {
+	reserve((size + arraySize >= capacity)?size + arraySize + 100 : size + arraySize);
+
+	for (size_t i = 0; i < arraySize; ++i) {
+		elements[size++] = array[i];
+	}
+
+	return *this;
+}
+
+template <class type>
+Sequence<type>& Sequence<type>::concat(const Sequence<type>& other) {
+	return this->push_back(other);
+}
+
+template <class type>
+[[nodiscard]] Sequence<type> operator+(const Sequence<type>& a, const Sequence<type>& b) {
+	Sequence<type> result(a);
+	result.concat(b);
+	return result;
+}
+
+template <class type>
+Sequence<type>& Sequence<type>::operator+=(const Sequence<type>& other) {
+	return this->concat(other);
 }
 
 #endif
