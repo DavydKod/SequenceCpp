@@ -2,7 +2,7 @@
 #include "cassert"
 #include <sstream>
 
-static int passedTestsCounter = 0;
+static size_t passedTestsCounter = 0;
 
 void testIndexOperator() {
 	Sequence<int> seq(10);
@@ -13,32 +13,11 @@ void testIndexOperator() {
 	assert(seq[2] == 5);
 	assert(seq.getSize() == 4);
 
-	bool exceptionThrown = false;
-
-	try {
-		seq[-1] = 4;
-	}
-	catch (const std::out_of_range& e) {
-		exceptionThrown = true;
-	}
-	
-	assert(exceptionThrown);
-	exceptionThrown = false;
-
-	try {
-		seq[87] = 4;
-	}
-	catch (const std::out_of_range& e) {
-		exceptionThrown = true;
-	}
-
-	assert(exceptionThrown);
 
 	int* elements = new int[] {3, 2, 8, 1};
 
 	const Sequence<int> sequence(elements, 4, 5);
 	assert(sequence[0] == 3 && sequence[3] == 1);
-	//sequence[2] = 0; - error because of a const object
 
 	++passedTestsCounter;
 }
@@ -120,7 +99,7 @@ void testComparisonOperator() {
 	++passedTestsCounter;
 }
 
-int testOperators() {
+size_t testOperators() {
 	testIndexOperator();
 	testAssignmentOperator();
 	testOutputOperator();

@@ -2,7 +2,7 @@
 #include "cassert"
 #include <sstream>
 
-static int passedTestsCounter = 0;
+static size_t passedTestsCounter = 0;
 
 void testCreation() {
 	Sequence<int> seq;
@@ -12,9 +12,18 @@ void testCreation() {
 	assert(sequence.getCapacity() == 50);
 	assert(sequence.getSize() == 0);
 	int* elements = new int[] {1, 2, 3, 4, 5};
-	Sequence<int> s(elements, 5, 2);
-	assert(s.getCapacity() == 2 && s.getSize() == 2);
-	assert(s[0] == 1 && s[1] == 2);
+	Sequence<int> s(elements, 5, 8);
+	assert(s.getCapacity() == 8 && s.getSize() == 5);
+	assert(s[0] == 1 && s[3] == 4);
+
+	bool exceptionThrown = false;
+	try {
+		Sequence<int> invalidSeq(elements, 5, 2);
+	}
+	catch (std::invalid_argument&) {
+		exceptionThrown = true;
+	}
+	assert(exceptionThrown);
 
 	passedTestsCounter++;
 }
@@ -72,6 +81,24 @@ void testChanging() {
 	seq.push_back(5).push_back(4).push_back(5);
 	seq.changeAll(5, 10);
 	assert(seq[0] == 10 && seq[5] == 10 && seq[7] == 10);
+
+	bool outOfRange = false;
+	try {
+		seq.changeAt(-55, 2);
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	outOfRange = false;
+
+	try {
+		seq.changeAt(65, 2);
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
 
 	passedTestsCounter++;
 }
@@ -161,11 +188,10 @@ void testResizing() {
 	seq.resize(123);
 	assert(seq.getCapacity() == 123);
 	assert(seq.getSize() == 4);
-	seq.resize(-54);
-	assert(seq.getCapacity() == seq.getSize() && seq.getCapacity() == 0);
+	seq.clear();
 	seq.push_back(98);
 	assert(seq[0] == 98);
-	assert(seq.getCapacity() == 100);
+	assert(seq.getCapacity() == 123);
 	assert(seq.getSize() == 1);
 	seq.resize(0);
 	assert(seq.getCapacity() == seq.getSize() && seq.getCapacity() == 0);
@@ -185,8 +211,6 @@ void testReserving() {
 	assert(seq.getCapacity() == 56);
 	seq.reserve(55);
 	assert(seq.getCapacity() == 56);
-	seq.reserve(-5);
-	assert(seq.getCapacity() == 56);
 
 	passedTestsCounter++;
 }
@@ -205,17 +229,42 @@ void testInserting() {
 	assert(seq[5] == 23);
 	seq.insertAt(6, 1);
 	assert(seq.getCapacity() == 110);
-	seq.insertAt(-57, 58);
-	assert(seq[0] == 58);
-	assert(seq[1] == 47);
-	seq.insertAt(254, 98);
-	assert(seq[12] == 98);
+
+	bool outOfRange = false;
+
+	try {
+		seq.insertAt(-57, 58);
+	}
+	catch (const std::out_of_range&) {
+		assert(seq[0] == 47);
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	outOfRange = false;
+	
+	try {
+		seq.insertAt(254, 58);
+	}
+	catch (const std::out_of_range&) {
+		assert(seq[0] == 47);
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	outOfRange = false;
+	
 	assert(seq.getCapacity() == 110);
-	assert(seq.getSize() == 13);
+	assert(seq.getSize() == 11);
 	seq.clear();
-	seq.insertAt(645, 2);
-	assert(seq[0] == 2);
-	assert(seq.getSize() == 1);
+
+	try {
+		seq.insertAt(0, 58);
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+
+	assert(seq.getSize() == 0);
 
 	passedTestsCounter++;
 }
@@ -234,10 +283,28 @@ void testRemoving() {
 	seq.insertAt(2, 5).push_back(5).insertAt(0, 5);
 	seq.removeAll(5).removeAll(654).removeAll(2).removeAll(4);
 	assert(seq[0] == 12 && seq[1] == 23 && seq[2] == 234 && seq.getSize() == 3);
-	seq.removeAt(-6).removeAt(87);
-	assert(seq[0] == 23 && seq.getSize() == 1);
-	seq.removeAll(23).removeAt(0);
-
+	
+	bool outOfRange = false;
+	try {
+		seq.removeAt(-6);
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	outOfRange = false;
+	
+	try {
+		seq.removeAt(87);
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	
+	seq.removeAll(23).removeAt(0).removeAt(0);
+	
+	assert(seq.getSize() == 0);
 	passedTestsCounter++;
 }
 
@@ -261,6 +328,7 @@ void testConstObjects() {
 	assert(seq.getCapacity() == 10);
 	assert(seq.getSize() == 2);
 	assert(seq[0] == true && seq[1] == false);
+	assert(seq.at(1) == false);
 	assert(!seq.isEmpty());
 	assert(seq.contains(true));
 	assert(seq.containsLotsOf(false) == 1);
@@ -290,11 +358,46 @@ void testSwap() {
 	assert(seq.getSize() == 5 && sequence.getSize() == 4);
 	assert(seq.getCapacity() == 15 && sequence.getCapacity() == 10);
 	assert(seq[0] == 5 && sequence[2] == 1 && seq[4] == 234);
+	
+	swap(seq, sequence);
+
+	assert(seq.getSize() == 4 && sequence.getSize() == 5);
+	assert(seq.getCapacity() == 10 && sequence.getCapacity() == 15);
+	assert(seq[0] == 2 && sequence[2] == 654 && seq[3] == 87);
 
 	++passedTestsCounter;
 }
 
-int testBasics() {
+void testGetting() {
+	Sequence<int> seq(6);
+	seq.push_back(2).push_back(42).push_back(1).push_back(8);
+	assert(seq.at(1) == 42);
+	assert(seq.at(3) == 8);
+	seq.at(3) = 1;
+	assert(seq.at(3) == 1);
+
+	bool outOfRange = false;
+	try {
+		seq.at(-1) = 5;
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+	outOfRange = false;
+
+	try {
+		seq.at(4) = 2;
+	}
+	catch (const std::out_of_range&) {
+		outOfRange = true;
+	}
+	assert(outOfRange);
+
+	++passedTestsCounter;
+}
+
+size_t testBasics() {
 	testCreation();
 	testEmpty();
 	testPushingPopping();
@@ -311,5 +414,6 @@ int testBasics() {
 	testCopying();
 	testConstObjects();
 	testSwap();
+	testGetting();
 	return passedTestsCounter;
 }

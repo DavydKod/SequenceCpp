@@ -7,91 +7,84 @@
 template <class type>
 class Sequence {
 private:
-	int size;
-	int capacity;
+	size_t size;
+	size_t capacity;
 	type* elements = nullptr;
 public:
-	Sequence(int capacity = 100) noexcept;
-	Sequence(const type* elems, const int size, int capacity = 100) noexcept;
+	Sequence(size_t capacity = 100);
+	Sequence(const type* elems, const size_t size, size_t capacity = 100);
 	Sequence(const Sequence<type>& other);
-	~Sequence();
+	~Sequence() noexcept;
 
-	int getSize() const noexcept;
-	int getCapacity() const noexcept;
-	bool isEmpty() const noexcept;
+	[[nodiscard]] size_t getSize() const noexcept;
+	[[nodiscard]] size_t getCapacity() const noexcept;
+	[[nodiscard]] bool isEmpty() const noexcept;
 	void clear() noexcept;
-	bool contains(const type& value) const;
-	size_t containsLotsOf(const type& value) const;
-	void resize(int newCapacity);
-	void reserve(int newBiggerCapacity);
+	[[nodiscard]] bool contains(const type&) const noexcept;
+	[[nodiscard]] size_t containsLotsOf(const type&) const noexcept;
+	void resize(size_t newCapacity);
+	void reserve(size_t newBiggerCapacity);
 	void shrink_to_fit();
-	Sequence<type>& push_back(const type& value);
-	Sequence<type>& pop_back();
-	Sequence<type>& insertAt(int index, const type& value);
-	Sequence<type>& changeAt(int index, const type& value);
+	Sequence<type>& push_back(const type&);
+	Sequence<type>& pop_back() noexcept;
+	Sequence<type>& insertAt(size_t index, const type& value);
+	Sequence<type>& changeAt(size_t index, const type& value);
 	Sequence<type>& changeAll(const type& previousValue, const type& nextValue);
-	Sequence<type>& removeAt(int index);
-	Sequence<type>& removeAll(const type& value);
+	Sequence<type>& removeAt(size_t);
+	Sequence<type>& removeAll(const type&);
+	[[nodiscard]] type& at(size_t);
+	[[nodiscard]] const type& at(size_t) const;
 	void print() const;
-	void swap(Sequence<type>&);
+	void swap(Sequence<type>&) noexcept;
 
-	type& operator[] (int index);
-	const type& operator[] (int index) const;
-	Sequence<type>& operator=(const Sequence<type>& other);
-	bool operator==(const Sequence<type>&) const;
-	bool operator!=(const Sequence<type>&) const;
+	[[nodiscard]] type& operator[] (size_t);
+	[[nodiscard]] const type& operator[] (size_t) const;
+	Sequence<type>& operator=(const Sequence<type>&);
+	[[nodiscard]] bool operator==(const Sequence<type>&) const noexcept;
+	[[nodiscard]] bool operator!=(const Sequence<type>&) const noexcept;
 };
 
-
-#include "../include/Sequence.h"
-
 template <class type>
-Sequence<type>::Sequence(const type* elems, const int size, int capacity) noexcept : capacity(capacity) {
-	elements = new type[capacity];
-
-	int count = (size < capacity) ? size : capacity;
-
-	for (int i = 0; i < count; ++i) {
-		elements[i] = elems[i];
+Sequence<type>::Sequence(const type* elems, const size_t size, size_t capacity) : size(size), capacity(capacity) {
+	if (size > capacity) {
+		throw std::invalid_argument("Sequence constructor: size cannot be greater than capacity");
 	}
 
-	this->size = count;
+	elements = new type[capacity];
+
+	for (size_t i = 0; i < size; ++i) {
+		elements[i] = elems[i];
+	}
 }
 
 template <class type>
-Sequence<type>::Sequence(int capacity) noexcept : capacity(capacity), size(0) {
+Sequence<type>::Sequence(size_t capacity) : capacity(capacity), size(0) {
 	elements = new type[capacity];
 }
 
 template <class type>
-Sequence<type>::~Sequence() {
+Sequence<type>::~Sequence() noexcept {
 	delete[] elements;
 }
 
 template <class type>
-int Sequence<type>::getSize() const noexcept {
+size_t Sequence<type>::getSize() const noexcept {
 	return size;
 }
 
 template <class type>
-int Sequence<type>::getCapacity() const noexcept {
+size_t Sequence<type>::getCapacity() const noexcept {
 	return capacity;
 }
 
 template <class type>
-type& Sequence<type>::operator[] (int index) {
-	if (index >= 0 && index < size) {
-		return elements[index];
-	}
-	throw std::out_of_range("Index " + std::to_string(index) + " out of range " + std::to_string(size));
+type& Sequence<type>::operator[] (size_t index) {
+	return elements[index];
 }
 
 template <class type>
-const type& Sequence<type>::operator[] (int index) const {
-	if (index >= 0 && index < size) {
-		return elements[index];
-	}
-	throw std::out_of_range("Index " + std::to_string(index) + " out of range " + std::to_string(size));
+const type& Sequence<type>::operator[] (size_t index) const {
+	return elements[index];
 }
 
 template <class type>
@@ -118,7 +111,7 @@ template <class type>
 Sequence<type>::Sequence(const Sequence<type>& other) : size(other.size), capacity(other.capacity) {
 	elements = new type[capacity];
 
-	for (int i = 0; i < size; i++) {
+	for (size_t i = 0; i < size; i++) {
 		elements[i] = other[i];
 	}
 }
@@ -130,7 +123,7 @@ Sequence<type>& Sequence<type>::operator=(const Sequence<type>& other) {
 		capacity = other.getCapacity();
 		size = other.getSize();
 		elements = new type[capacity];
-		for (int i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			elements[i] = other[i];
 		}
@@ -139,8 +132,8 @@ Sequence<type>& Sequence<type>::operator=(const Sequence<type>& other) {
 }
 
 template <class type>
-bool Sequence<type>::contains(const type& value) const {
-	for (int i = 0; i < size; i++)
+bool Sequence<type>::contains(const type& value) const noexcept {
+	for (size_t i = 0; i < size; i++)
 	{
 		if (elements[i] == value) {
 			return true;
@@ -150,9 +143,9 @@ bool Sequence<type>::contains(const type& value) const {
 }
 
 template <class type>
-size_t Sequence<type>::containsLotsOf(const type& value) const {
+size_t Sequence<type>::containsLotsOf(const type& value) const noexcept {
 	size_t counter = 0;
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		if (elements[i] == value) {
 			counter++;
@@ -162,22 +155,11 @@ size_t Sequence<type>::containsLotsOf(const type& value) const {
 }
 
 template <class type>
-void Sequence<type>::resize(int newCapacity) {
-	if (newCapacity < 0)
-	{
-		clear();
-		if (capacity > 0)
-		{
-			delete[] elements;
-		}
-		elements = nullptr;
-		capacity = 0;
-		return;
-	}
+void Sequence<type>::resize(size_t newCapacity) {
 	if (newCapacity != capacity) {
 		type* newElements = new type[newCapacity];
-		int newSize = (size > newCapacity) ? newCapacity : size;
-		for (int i = 0; i < newSize; i++)
+		size_t newSize = (size > newCapacity) ? newCapacity : size;
+		for (size_t i = 0; i < newSize; i++)
 		{
 			newElements[i] = elements[i];
 		}
@@ -189,36 +171,24 @@ void Sequence<type>::resize(int newCapacity) {
 }
 
 template <class type>
-Sequence<type>& Sequence<type>::changeAt(int index, const type& value) {
-	if (index < 0)
+Sequence<type>& Sequence<type>::changeAt(size_t index, const type& value) {
+	if (index >= size)
 	{
-		index = 0;
+		throw std::out_of_range("Index out of range");
 	}
-	if (index < size)
-	{
-		elements[index] = value;
-	}
-	else {
-		push_back(value);
-	}
+
+	elements[index] = value;
+
 	return *this;
 }
 
 template <class type>
-Sequence<type>& Sequence<type>::removeAt(int index) {
-	if (size == 0)
-	{
-		return *this;
+Sequence<type>& Sequence<type>::removeAt(size_t index) {
+	if (index >= size) {
+		throw std::out_of_range("Index out of range");
 	}
 
-	if (index < 0) {
-		index = 0;
-	}
-	else if (index >= size) {
-		index = size - 1;
-	}
-
-	for (int i = index; i < size - 1; i++)
+	for (size_t i = index; i < size - 1; i++)
 	{
 		elements[i] = elements[i + 1];
 	}
@@ -227,22 +197,18 @@ Sequence<type>& Sequence<type>::removeAt(int index) {
 }
 
 template <class type>
-Sequence<type>& Sequence<type>::insertAt(int index, const type& value) {
-	if (size == 0 || index >= size)
-	{
-		push_back(value);
-		return *this;
+Sequence<type>& Sequence<type>::insertAt(size_t index, const type& value) {
+	if (index >= size) {
+		throw std::out_of_range("Index out of range");
 	}
-	if (index < 0) {
-		index = 0;
-	}
+
 	if (size == capacity)
 	{
 		resize(capacity + 100);
 	}
 	size++;
 
-	for (int i = size - 1; i > index; i--)
+	for (size_t i = size - 1; i > index; i--)
 	{
 		elements[i] = elements[i - 1];
 	}
@@ -252,7 +218,7 @@ Sequence<type>& Sequence<type>::insertAt(int index, const type& value) {
 }
 
 template <class type>
-Sequence<type>& Sequence<type>::pop_back() {
+Sequence<type>& Sequence<type>::pop_back() noexcept {
 	if (size > 0)
 	{
 		size--;
@@ -260,8 +226,25 @@ Sequence<type>& Sequence<type>::pop_back() {
 	return *this;
 }
 
+template<class type>
+type& Sequence<type>::at(size_t index) {
+	if (index >= size) {
+		throw std::out_of_range("Index out of range");
+	}
+
+	return elements[index];
+}
+template<class type>
+const type& Sequence<type>::at(size_t index) const {
+	if (index >= size) {
+		throw std::out_of_range("Index out of range");
+	}
+
+	return elements[index];
+}
+
 template <class type>
-void Sequence<type>::reserve(int newBiggerCapacity) {
+void Sequence<type>::reserve(size_t newBiggerCapacity) {
 	if (newBiggerCapacity > capacity)
 	{
 		resize(newBiggerCapacity);
@@ -275,7 +258,7 @@ void Sequence<type>::shrink_to_fit() {
 
 template <class type>
 Sequence<type>& Sequence<type>::removeAll(const type& value) {
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		if (elements[i] == value)
 		{
@@ -289,7 +272,7 @@ Sequence<type>& Sequence<type>::removeAll(const type& value) {
 
 template <class type>
 Sequence<type>& Sequence<type>::changeAll(const type& previousValue, const type& nextValue) {
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		if (elements[i] == previousValue)
 		{
@@ -302,7 +285,7 @@ Sequence<type>& Sequence<type>::changeAll(const type& previousValue, const type&
 template <class type>
 void Sequence<type>::print() const {
 	std::cout << "Sequence (capacity = " << capacity << ", size = " << size << "): ";
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		std::cout << elements[i] << " ";
 	}
@@ -312,7 +295,7 @@ void Sequence<type>::print() const {
 template<class type>
 std::ostream& operator<<(std::ostream& os, const Sequence<type>& sequence) {
 	os << "Sequence (capacity = " << sequence.getCapacity() << ", size = " << sequence.getSize() << "): ";
-	for (int i = 0; i < sequence.getSize(); i++)
+	for (size_t i = 0; i < sequence.getSize(); i++)
 	{
 		os << sequence[i] << " ";
 	}
@@ -322,12 +305,12 @@ std::ostream& operator<<(std::ostream& os, const Sequence<type>& sequence) {
 }
 
 template<class type>
-bool Sequence<type>::operator==(const Sequence<type>& seq) const {
+bool Sequence<type>::operator==(const Sequence<type>& seq) const noexcept {
 	if (getSize() != seq.getSize())
 	{
 		return false;
 	}
-	for (int i = 0; i < getSize(); ++i) {
+	for (size_t i = 0; i < getSize(); ++i) {
 		if ((*this)[i] != seq[i])
 		{
 			return false;
@@ -337,17 +320,17 @@ bool Sequence<type>::operator==(const Sequence<type>& seq) const {
 }
 
 template<class type>
-bool Sequence<type>::operator!=(const Sequence<type>& seq) const {
+bool Sequence<type>::operator!=(const Sequence<type>& seq) const noexcept {
 	return !(*this == seq);
 }
 
 template <class type>
-void Sequence<type>::swap(Sequence<type>& other) {
-	int savedSize = getSize();
+void Sequence<type>::swap(Sequence<type>& other) noexcept {
+	size_t savedSize = getSize();
 	size = other.getSize();
 	other.size = savedSize;
 
-	int savedCapacity = getCapacity();
+	size_t savedCapacity = getCapacity();
 	capacity = other.getCapacity();
 	other.capacity = savedCapacity;
 
@@ -356,5 +339,9 @@ void Sequence<type>::swap(Sequence<type>& other) {
 	other.elements = savedElements;
 }
 
+template <class type>
+void swap(Sequence<type>& a, Sequence<type>& b) noexcept {
+	a.swap(b);
+}
 
 #endif

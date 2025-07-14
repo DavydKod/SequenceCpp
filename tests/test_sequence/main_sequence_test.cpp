@@ -1,8 +1,8 @@
-int testBasics();
-int testOperators();
+size_t testBasics();
+size_t testOperators();
 
-int testSequence() {
-	int passedTests = 0;
+size_t testSequence() {
+	size_t passedTests = 0;
 	passedTests += testBasics();
 	passedTests += testOperators();
 	return passedTests;
