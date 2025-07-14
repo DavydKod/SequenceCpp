@@ -1,8 +1,7 @@
 #include "../../include/Sequence.h"
+#include "runTestMethods.h"
 #include "cassert"
 #include <sstream>
-
-static size_t passedTestsCounter = 0;
 
 void testCreation() {
 	Sequence<int> seq;
@@ -24,8 +23,6 @@ void testCreation() {
 		exceptionThrown = true;
 	}
 	assert(exceptionThrown);
-
-	passedTestsCounter++;
 }
 
 void testEmpty() {
@@ -35,8 +32,6 @@ void testEmpty() {
 	assert(!seq.isEmpty());
 	seq.clear();
 	assert(seq.isEmpty());
-
-	passedTestsCounter++;
 }
 
 void testPushingPopping() {
@@ -47,8 +42,6 @@ void testPushingPopping() {
 	assert(seq[3] == 23);
 	seq.pop_back().push_back(234);
 	assert(seq[3] == 234);
-
-	passedTestsCounter++;
 }
 
 void testPrinting() {
@@ -65,8 +58,6 @@ void testPrinting() {
 	std::string output = buffer.str();
 
 	assert(output == "Sequence (capacity = 100, size = 5): 5 12 654 23 234 \n");
-
-	passedTestsCounter++;
 }
 
 void testChanging() {
@@ -99,8 +90,6 @@ void testChanging() {
 		outOfRange = true;
 	}
 	assert(outOfRange);
-
-	passedTestsCounter++;
 }
 
 void testClearing() {
@@ -112,8 +101,6 @@ void testClearing() {
 	seq.clear();
 	assert(seq.getSize() == 0);
 	assert(seq.getCapacity() == 15);
-
-	passedTestsCounter++;
 }
 
 void testPushingOutOfRangeOfCapacity() {
@@ -121,8 +108,6 @@ void testPushingOutOfRangeOfCapacity() {
 	assert(seq.getCapacity() == 2);
 	seq.push_back(5).push_back(12).push_back(654).push_back(23).push_back(234);
 	assert(seq.getCapacity() == 102);
-
-	passedTestsCounter++;
 }
 
 void testContaining() {
@@ -142,8 +127,6 @@ void testContaining() {
 	assert(!seq.contains(5) && !seq.contains(4) && !seq.contains(23));
 	assert(seq.containsLotsOf(5) == 0);
 	assert(seq.containsLotsOf(6) == 0);
-
-	passedTestsCounter++;
 }
 
 void testShrinking() {
@@ -169,8 +152,6 @@ void testShrinking() {
 	assert(seq.getCapacity() == 9);
 	assert(seq[8] == 9);
 	assert(seq[1] == 12);
-
-	passedTestsCounter++;
 }
 
 void testResizing() {
@@ -195,8 +176,6 @@ void testResizing() {
 	assert(seq.getSize() == 1);
 	seq.resize(0);
 	assert(seq.getCapacity() == seq.getSize() && seq.getCapacity() == 0);
-
-	passedTestsCounter++;
 }
 
 void testReserving() {
@@ -211,8 +190,6 @@ void testReserving() {
 	assert(seq.getCapacity() == 56);
 	seq.reserve(55);
 	assert(seq.getCapacity() == 56);
-
-	passedTestsCounter++;
 }
 
 void testInserting() {
@@ -265,8 +242,6 @@ void testInserting() {
 	assert(outOfRange);
 
 	assert(seq.getSize() == 0);
-
-	passedTestsCounter++;
 }
 
 void testRemoving() {
@@ -305,7 +280,6 @@ void testRemoving() {
 	seq.removeAll(23).removeAt(0).removeAt(0);
 	
 	assert(seq.getSize() == 0);
-	passedTestsCounter++;
 }
 
 void testCopying() {
@@ -319,8 +293,6 @@ void testCopying() {
 	assert(sequence.getSize() != seq.getSize() && sequence[0] != seq[0] && sequence.getCapacity() == seq.getCapacity());
 	sequence.reserve(13);
 	assert(sequence.getCapacity() != seq.getCapacity());
-
-	passedTestsCounter++;
 }
 
 void testConstObjects() {
@@ -343,8 +315,6 @@ void testConstObjects() {
 	std::string output = buffer.str();
 
 	assert(output == "Sequence (capacity = 10, size = 2): 1 0 \n");
-
-	++passedTestsCounter;
 }
 
 void testSwap() {
@@ -364,8 +334,6 @@ void testSwap() {
 	assert(seq.getSize() == 4 && sequence.getSize() == 5);
 	assert(seq.getCapacity() == 10 && sequence.getCapacity() == 15);
 	assert(seq[0] == 2 && sequence[2] == 654 && seq[3] == 87);
-
-	++passedTestsCounter;
 }
 
 void testGetting() {
@@ -393,27 +361,27 @@ void testGetting() {
 		outOfRange = true;
 	}
 	assert(outOfRange);
-
-	++passedTestsCounter;
 }
 
 size_t testBasics() {
-	testCreation();
-	testEmpty();
-	testPushingPopping();
-	testPrinting();
-	testChanging();
-	testClearing();
-	testPushingOutOfRangeOfCapacity();
-	testContaining();
-	testShrinking();
-	testResizing();
-	testReserving();
-	testInserting();
-	testRemoving();
-	testCopying();
-	testConstObjects();
-	testSwap();
-	testGetting();
-	return passedTestsCounter;
+	size_t passedTests = 0;
+
+	runTest(testCreation, passedTests);
+	runTest(testEmpty, passedTests);
+	runTest(testPushingPopping, passedTests);
+	runTest(testPrinting, passedTests);
+	runTest(testChanging, passedTests);
+	runTest(testClearing, passedTests);
+	runTest(testPushingOutOfRangeOfCapacity, passedTests);
+	runTest(testContaining, passedTests);
+	runTest(testShrinking, passedTests);
+	runTest(testResizing, passedTests);
+	runTest(testReserving, passedTests);
+	runTest(testRemoving, passedTests);
+	runTest(testInserting, passedTests);
+	runTest(testCopying, passedTests);
+	runTest(testConstObjects, passedTests);
+	runTest(testSwap, passedTests);
+	runTest(testGetting, passedTests);
+	return passedTests;
 }

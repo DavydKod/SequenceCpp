@@ -1,8 +1,7 @@
 #include "../../include/Sequence.h"
+#include "runTestMethods.h"
 #include "cassert"
 #include <sstream>
-
-static size_t passedTestsCounter = 0;
 
 void testIndexOperator() {
 	Sequence<int> seq(10);
@@ -18,8 +17,6 @@ void testIndexOperator() {
 
 	const Sequence<int> sequence(elements, 4, 5);
 	assert(sequence[0] == 3 && sequence[3] == 1);
-
-	++passedTestsCounter;
 }
 
 void testAssignmentOperator() {
@@ -48,8 +45,6 @@ void testAssignmentOperator() {
 	assert(seqD.getCapacity() == seqA.getCapacity() && seqD.getCapacity() == seqB.getCapacity()
 		&& seqD.getCapacity() == seqC.getCapacity());
 	assert(seqA[0] == seqD[0] && seqB[1] == seqD[1] && seqC[2] == seqD[2]);
-
-	++passedTestsCounter;
 }
 
 void testOutputOperator() {
@@ -69,8 +64,67 @@ void testOutputOperator() {
 	std::string output = buffer.str();
 
 	assert(output == "Sequence (capacity = 10, size = 4): 2 42 1 87 \nSequence (capacity = 15, size = 5): 5 12 654 23 234 \n");
+}
 
-	++passedTestsCounter;
+void testInputOperator() {
+	std::stringstream ss("5 10 20 30 40 50");
+
+	Sequence<int> seq(2);
+	ss >> seq;
+
+	assert(seq.getCapacity() == 102);
+	assert(seq.getSize() == 5);
+	assert(seq[0] == 10);
+	assert(seq[1] == 20);
+	assert(seq[2] == 30);
+	assert(seq[3] == 40);
+	assert(seq[4] == 50);
+
+	std::stringstream s("5 10 20 40 50");
+
+	Sequence<int> seqA(2);
+	s >> seqA;
+
+	assert(seqA.getCapacity() == 102);
+	assert(seqA.getSize() == 4);
+	assert(seqA[0] == 10);
+	assert(seqA[1] == 20);
+	assert(seqA[2] == 40);
+	assert(seqA[3] == 50);
+
+	std::stringstream is("5 10 20 -40 50 255 6");
+
+	Sequence<int> seqB(2);
+	is >> seqB;
+
+	assert(seqB.getCapacity() == 102);
+	assert(seqB.getSize() == 5);
+	assert(seqB[0] == 10);
+	assert(seqB[1] == 20);
+	assert(seqB[2] == -40);
+	assert(seqB[3] == 50);
+	assert(seqB[4] == 255);
+
+	std::stringstream istr("");
+
+	Sequence<int> seqC(2);
+	istr >> seqC;
+
+	assert(seqC.getCapacity() == 2);
+	assert(seqC.getSize() == 0);
+
+	std::stringstream sstream("abc");
+	Sequence<int> seqD;
+	sstream >> seqD;
+	assert(seqD.getSize() == 0);
+	assert(sstream.fail());
+
+	std::stringstream stream("4 -6 abc -2");
+	Sequence<int> seqE;
+	stream >> seqE;
+	assert(seqE.getSize() == 1);
+	assert(seqE.at(0) == -6);
+	assert(stream.fail());
 }
 
 void testComparisonOperator() {
@@ -95,14 +149,14 @@ void testComparisonOperator() {
 
 	assert(seq == sequence);
 	assert(!(seq != sequence));
-
-	++passedTestsCounter;
 }
 
 size_t testOperators() {
-	testIndexOperator();
-	testAssignmentOperator();
-	testOutputOperator();
-	testComparisonOperator();
-	return passedTestsCounter;
+	size_t passedTests = 0;
+	runTest(testIndexOperator, passedTests);
+	runTest(testAssignmentOperator, passedTests);
+	runTest(testOutputOperator, passedTests);
+	runTest(testInputOperator, passedTests);
+	runTest(testComparisonOperator, passedTests);
+	return passedTests;
 }

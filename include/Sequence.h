@@ -305,6 +305,25 @@ std::ostream& operator<<(std::ostream& os, const Sequence<type>& sequence) {
 }
 
 template<class type>
+std::istream& operator>>(std::istream& is, Sequence<type>& seq) {
+	size_t n;
+	is >> n; 
+	if (!is) return is;
+
+	seq.clear();
+
+	for (size_t i = 0; i < n; ++i) {
+		type value;
+		is >> value;
+		if (!is) break;
+
+		seq.push_back(value);
+	}
+
+	return is;
+}
+
+template<class type>
 bool Sequence<type>::operator==(const Sequence<type>& seq) const noexcept {
 	if (getSize() != seq.getSize())
 	{
