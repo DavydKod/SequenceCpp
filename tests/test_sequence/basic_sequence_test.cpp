@@ -192,6 +192,17 @@ void testReserving() {
 	assert(seq.getCapacity() == 56);
 }
 
+template<class type>
+bool tryInsert(Sequence<type>& seq, size_t index, const type& value) {
+	try {
+		seq.insertAt(index, value);
+	}
+	catch (const std::out_of_range&) {
+		return false;
+	}
+	return true;
+}
+
 void testInserting() {
 	Sequence<int> seq(10);
 	seq.push_back(7).push_back(12).push_back(654).push_back(23).push_back(234).push_back(5).push_back(4).push_back(5);
@@ -207,41 +218,26 @@ void testInserting() {
 	seq.insertAt(6, 1);
 	assert(seq.getCapacity() == 110);
 
-	bool outOfRange = false;
-
-	try {
-		seq.insertAt(-57, 58);
-	}
-	catch (const std::out_of_range&) {
-		assert(seq[0] == 47);
-		outOfRange = true;
-	}
-	assert(outOfRange);
-	outOfRange = false;
-	
-	try {
-		seq.insertAt(254, 58);
-	}
-	catch (const std::out_of_range&) {
-		assert(seq[0] == 47);
-		outOfRange = true;
-	}
-	assert(outOfRange);
-	outOfRange = false;
+	assert(!tryInsert(seq, -57, 58));
+	assert(!tryInsert(seq, 254, 8));
 	
 	assert(seq.getCapacity() == 110);
 	assert(seq.getSize() == 11);
 	seq.clear();
 
+	seq.insertAt(0, 66).insertAt(1, 4).insertAt(2, 60);
+	assert(seq.getSize() == 3 && seq.at(0) == 66 && seq.at(2) == 60);
+}
+
+template<class type>
+bool tryRemove(Sequence<type>& seq, size_t index) {
 	try {
-		seq.insertAt(0, 58);
+		seq.removeAt(index);
 	}
 	catch (const std::out_of_range&) {
-		outOfRange = true;
+		return false;
 	}
-	assert(outOfRange);
-
-	assert(seq.getSize() == 0);
+	return true;
 }
 
 void testRemoving() {
@@ -259,23 +255,8 @@ void testRemoving() {
 	seq.removeAll(5).removeAll(654).removeAll(2).removeAll(4);
 	assert(seq[0] == 12 && seq[1] == 23 && seq[2] == 234 && seq.getSize() == 3);
 	
-	bool outOfRange = false;
-	try {
-		seq.removeAt(-6);
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
-	outOfRange = false;
-	
-	try {
-		seq.removeAt(87);
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
+	assert(!tryRemove(seq, -6));
+	assert(!tryRemove(seq, 87));
 	
 	seq.removeAll(23).removeAt(0).removeAt(0);
 	
@@ -336,6 +317,17 @@ void testSwap() {
 	assert(seq[0] == 2 && sequence[2] == 654 && seq[3] == 87);
 }
 
+template<class type>
+bool tryAt(Sequence<type>& seq, size_t index) {
+	try {
+		seq.at(index);
+	}
+	catch (const std::out_of_range&) {
+		return false;
+	}
+	return true;
+}
+
 void testGetting() {
 	Sequence<int> seq(6);
 	seq.push_back(2).push_back(42).push_back(1).push_back(8);
@@ -344,23 +336,18 @@ void testGetting() {
 	seq.at(3) = 1;
 	assert(seq.at(3) == 1);
 
-	bool outOfRange = false;
-	try {
-		seq.at(-1) = 5;
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
-	outOfRange = false;
+	assert(!tryAt(seq, -1));
+	assert(!tryAt(seq, 4));
+}
 
-	try {
-		seq.at(4) = 2;
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
+template <class type>
+Sequence<type> MoveSequenceThroughReturn(Sequence<type>&& seq) {
+	return seq;
+}
+
+void testMoveSemantics() {
+	Sequence<double> seq(new double[] {1,5.6,3}, 3, 10);
+	seq = MoveSequenceThroughReturn(std::move(seq));
 }
 
 size_t testBasics() {
@@ -383,5 +370,7 @@ size_t testBasics() {
 	runTest(testConstObjects, passedTests);
 	runTest(testSwap, passedTests);
 	runTest(testGetting, passedTests);
+	runTest(testMoveSemantics, passedTests);
+
 	return passedTests;
 }

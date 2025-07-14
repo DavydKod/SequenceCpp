@@ -13,15 +13,16 @@ private:
 public:
 	Sequence(size_t capacity = 100);
 	Sequence(const type* elems, const size_t size, size_t capacity = 100);
-	Sequence(const Sequence<type>& other);
+	Sequence(const Sequence<type>&);
+	Sequence(Sequence&&) noexcept;
 	~Sequence() noexcept;
 
 	[[nodiscard]] size_t getSize() const noexcept;
 	[[nodiscard]] size_t getCapacity() const noexcept;
 	[[nodiscard]] bool isEmpty() const noexcept;
 	void clear() noexcept;
-	[[nodiscard]] bool contains(const type&) const noexcept;
-	[[nodiscard]] size_t containsLotsOf(const type&) const noexcept;
+	[[nodiscard]] bool contains(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
+	[[nodiscard]] size_t containsLotsOf(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 	void resize(size_t newCapacity);
 	void reserve(size_t newBiggerCapacity);
 	void shrink_to_fit();
@@ -40,8 +41,9 @@ public:
 	[[nodiscard]] type& operator[] (size_t);
 	[[nodiscard]] const type& operator[] (size_t) const;
 	Sequence<type>& operator=(const Sequence<type>&);
-	[[nodiscard]] bool operator==(const Sequence<type>&) const noexcept;
-	[[nodiscard]] bool operator!=(const Sequence<type>&) const noexcept;
+	Sequence<type>& operator=(Sequence<type>&&) noexcept;
+	[[nodiscard]] bool operator==(const Sequence<type>&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
+	[[nodiscard]] bool operator!=(const Sequence<type>&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 };
 
 template <class type>
@@ -132,7 +134,23 @@ Sequence<type>& Sequence<type>::operator=(const Sequence<type>& other) {
 }
 
 template <class type>
-bool Sequence<type>::contains(const type& value) const noexcept {
+Sequence<type>& Sequence<type>::operator=(Sequence<type>&& other) noexcept {
+	if (this != &other) {
+		delete[] elements;
+		
+		elements = other.elements;
+		size = other.size;
+		capacity = other.capacity;
+
+		other.elements = nullptr;
+		other.size = 0;
+		other.capacity = 0;
+	}
+	return *this;
+}
+
+template <class type>
+bool Sequence<type>::contains(const type& value) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
 	for (size_t i = 0; i < size; i++)
 	{
 		if (elements[i] == value) {
@@ -143,7 +161,7 @@ bool Sequence<type>::contains(const type& value) const noexcept {
 }
 
 template <class type>
-size_t Sequence<type>::containsLotsOf(const type& value) const noexcept {
+size_t Sequence<type>::containsLotsOf(const type& value) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
 	size_t counter = 0;
 	for (size_t i = 0; i < size; i++)
 	{
@@ -198,7 +216,7 @@ Sequence<type>& Sequence<type>::removeAt(size_t index) {
 
 template <class type>
 Sequence<type>& Sequence<type>::insertAt(size_t index, const type& value) {
-	if (index >= size) {
+	if (index > size) {
 		throw std::out_of_range("Index out of range");
 	}
 
@@ -324,7 +342,7 @@ std::istream& operator>>(std::istream& is, Sequence<type>& seq) {
 }
 
 template<class type>
-bool Sequence<type>::operator==(const Sequence<type>& seq) const noexcept {
+bool Sequence<type>::operator==(const Sequence<type>& seq) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
 	if (getSize() != seq.getSize())
 	{
 		return false;
@@ -339,7 +357,7 @@ bool Sequence<type>::operator==(const Sequence<type>& seq) const noexcept {
 }
 
 template<class type>
-bool Sequence<type>::operator!=(const Sequence<type>& seq) const noexcept {
+bool Sequence<type>::operator!=(const Sequence<type>& seq) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
 	return !(*this == seq);
 }
 
@@ -361,6 +379,13 @@ void Sequence<type>::swap(Sequence<type>& other) noexcept {
 template <class type>
 void swap(Sequence<type>& a, Sequence<type>& b) noexcept {
 	a.swap(b);
+}
+
+template<class type>
+Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), size(other.size), capacity(other.capacity) {
+	other.elements = nullptr;
+	other.size = 0;
+	other.capacity = 0;
 }
 
 #endif
