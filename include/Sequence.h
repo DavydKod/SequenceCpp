@@ -10,6 +10,7 @@ private:
 	size_t size;
 	size_t capacity;
 	type* elements = nullptr;
+	size_t capacityGrowthStep = 100;
 public:
 	Sequence(size_t capacity = 100);
 	Sequence(const type* elems, const size_t size, size_t capacity = 100);
@@ -17,19 +18,31 @@ public:
 	Sequence(Sequence&&) noexcept;
 	~Sequence() noexcept;
 
+	void setCapacityGrowthStep(size_t) noexcept;
+	[[nodiscard]] size_t getCapacityGrowthStep() const noexcept;
 	[[nodiscard]] size_t getSize() const noexcept;
 	[[nodiscard]] size_t getCapacity() const noexcept;
 	[[nodiscard]] bool isEmpty() const noexcept;
+	[[nodiscard]] bool isFull() const noexcept;
+	[[nodiscard]] size_t find(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
+	[[nodiscard]] size_t findFirst(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
+	[[nodiscard]] size_t findLast(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 	void clear() noexcept;
 	[[nodiscard]] bool contains(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 	[[nodiscard]] size_t containsLotsOf(const type&) const noexcept(noexcept(std::declval<type>() == std::declval<type>()));
 	void resize(size_t newCapacity);
 	void reserve(size_t newBiggerCapacity);
 	void shrink_to_fit();
+	[[nodiscard]] type& front();
+	[[nodiscard]] type& back();
+	[[nodiscard]] const type& front() const;
+	[[nodiscard]] const type& back() const;
 	Sequence<type>& push_back(const type&);
 	Sequence<type>& push_back(const Sequence<type>&);
 	Sequence<type>& push_back(const type*, size_t);
+	Sequence<type>& push_front(const type&);
 	Sequence<type>& pop_back() noexcept;
+	Sequence<type>& pop_front() noexcept;
 	Sequence<type>& insertAt(size_t index, const type& value);
 	Sequence<type>& changeAt(size_t index, const type& value);
 	Sequence<type>& changeAll(const type& previousValue, const type& nextValue);
@@ -95,9 +108,41 @@ const type& Sequence<type>::operator[] (size_t index) const {
 }
 
 template <class type>
+type& Sequence<type>::front() {
+	if (isEmpty()) {
+		throw std::out_of_range("Cannot call front() on an empty Sequence");
+	}
+	return elements[0];
+}
+
+template <class type>
+type& Sequence<type>::back() {
+	if (isEmpty()) {
+		throw std::out_of_range("Cannot call back() on an empty Sequence");
+	}
+	return elements[size - 1];
+}
+
+template <class type>
+const type& Sequence<type>::front() const {
+	if (isEmpty()) {
+		throw std::out_of_range("Cannot call front() on an empty Sequence");
+	}
+	return elements[0];
+}
+
+template <class type>
+const type& Sequence<type>::back() const{
+	if (isEmpty()) {
+		throw std::out_of_range("Cannot call back() on an empty Sequence");
+	}
+	return elements[size - 1];
+}
+
+template <class type>
 Sequence<type>& Sequence<type>::push_back(const type& value) {
 	if (size >= capacity) {
-		resize(capacity + 100);
+		resize(capacity + capacityGrowthStep);
 	}
 	elements[size] = value;
 	++size;
@@ -105,8 +150,18 @@ Sequence<type>& Sequence<type>::push_back(const type& value) {
 }
 
 template <class type>
+Sequence<type>& Sequence<type>::push_front(const type& value) {
+	return insertAt(0, value);
+}
+
+template <class type>
 bool Sequence<type>::isEmpty() const noexcept {
 	return size == 0;
+}
+
+template <class type>
+bool Sequence<type>::isFull() const noexcept {
+	return size == capacity;
 }
 
 template <class type>
@@ -227,7 +282,7 @@ Sequence<type>& Sequence<type>::insertAt(size_t index, const type& value) {
 
 	if (size == capacity)
 	{
-		resize(capacity + 100);
+		resize(capacity + capacityGrowthStep);
 	}
 	size++;
 
@@ -247,6 +302,11 @@ Sequence<type>& Sequence<type>::pop_back() noexcept {
 		size--;
 	}
 	return *this;
+}
+
+template<class type>
+Sequence<type>& Sequence<type>::pop_front() noexcept {
+	return removeAt(0);
 }
 
 template<class type>
@@ -396,7 +456,7 @@ Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), s
 template <class type>
 Sequence<type>& Sequence<type>::push_back(const Sequence<type>& other) {
 	size_t otherSize = other.size;
-	reserve((size + other.size >= capacity) ? size + other.size + 100 : size + other.size);
+	reserve((size + other.size >= capacity) ? size + other.size + capacityGrowthStep : size + other.size);
 
 	for (size_t i = 0; i < otherSize; ++i) {
 		elements[size++] = other.elements[i];
@@ -407,7 +467,7 @@ Sequence<type>& Sequence<type>::push_back(const Sequence<type>& other) {
 
 template <class type>
 Sequence<type>& Sequence<type>::push_back(const type* array, size_t arraySize) {
-	reserve((size + arraySize >= capacity)?size + arraySize + 100 : size + arraySize);
+	reserve((size + arraySize >= capacity)?size + arraySize + capacityGrowthStep : size + arraySize);
 
 	for (size_t i = 0; i < arraySize; ++i) {
 		elements[size++] = array[i];
@@ -431,6 +491,39 @@ template <class type>
 template <class type>
 Sequence<type>& Sequence<type>::operator+=(const Sequence<type>& other) {
 	return this->concat(other);
+}
+
+template <class type>
+void Sequence<type>::setCapacityGrowthStep(size_t step) noexcept {
+	capacityGrowthStep = step;
+}
+
+template <class type>
+size_t Sequence<type>::getCapacityGrowthStep() const noexcept {
+	return capacityGrowthStep;
+}
+
+template <class type>
+size_t Sequence<type>::find(const type& value) const noexcept(noexcept(std::declval<type>() == std::declval<type>())){
+	for (size_t i = 0; i < size; i++)
+	{
+		if (value == elements[i]) { return i; }
+	}
+	return size;
+}
+
+template <class type>
+size_t Sequence<type>::findFirst(const type& value) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
+	return find(value);
+}
+
+template <class type>
+size_t Sequence<type>::findLast(const type& value) const noexcept(noexcept(std::declval<type>() == std::declval<type>())) {
+	for (size_t i = size; i-- > 0;)
+	{
+		if (value == elements[i]) { return i; }
+	}
+	return size;
 }
 
 #endif
