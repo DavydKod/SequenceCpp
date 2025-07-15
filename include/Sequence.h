@@ -78,38 +78,38 @@ Sequence<type>::Sequence(const type* elems, const size_t size, size_t capacity, 
 }
 
 template <class type>
-Sequence<type>::Sequence(size_t capacity, size_t capacityGrowthStep) : capacity(capacity),
+inline Sequence<type>::Sequence(size_t capacity, size_t capacityGrowthStep) : capacity(capacity),
            capacityGrowthStep(capacityGrowthStep), size(0) {
 	elements = new type[capacity];
 }
 
 template <class type>
-Sequence<type>::~Sequence() noexcept {
+inline Sequence<type>::~Sequence() noexcept {
 	delete[] elements;
 }
 
 template <class type>
-size_t Sequence<type>::getSize() const noexcept {
+inline size_t Sequence<type>::getSize() const noexcept {
 	return size;
 }
 
 template <class type>
-size_t Sequence<type>::getCapacity() const noexcept {
+inline size_t Sequence<type>::getCapacity() const noexcept {
 	return capacity;
 }
 
 template <class type>
-type& Sequence<type>::operator[] (size_t index) {
+inline type& Sequence<type>::operator[] (size_t index) {
 	return elements[index];
 }
 
 template <class type>
-const type& Sequence<type>::operator[] (size_t index) const {
+inline const type& Sequence<type>::operator[] (size_t index) const {
 	return elements[index];
 }
 
 template <class type>
-type& Sequence<type>::front() {
+inline type& Sequence<type>::front() {
 	if (isEmpty()) {
 		throw std::out_of_range("Cannot call front() on an empty Sequence");
 	}
@@ -117,7 +117,7 @@ type& Sequence<type>::front() {
 }
 
 template <class type>
-type& Sequence<type>::back() {
+inline type& Sequence<type>::back() {
 	if (isEmpty()) {
 		throw std::out_of_range("Cannot call back() on an empty Sequence");
 	}
@@ -125,7 +125,7 @@ type& Sequence<type>::back() {
 }
 
 template <class type>
-const type& Sequence<type>::front() const {
+inline const type& Sequence<type>::front() const {
 	if (isEmpty()) {
 		throw std::out_of_range("Cannot call front() on an empty Sequence");
 	}
@@ -133,7 +133,7 @@ const type& Sequence<type>::front() const {
 }
 
 template <class type>
-const type& Sequence<type>::back() const{
+inline const type& Sequence<type>::back() const{
 	if (isEmpty()) {
 		throw std::out_of_range("Cannot call back() on an empty Sequence");
 	}
@@ -156,12 +156,12 @@ Sequence<type>& Sequence<type>::push_front(const type& value) {
 }
 
 template <class type>
-bool Sequence<type>::isEmpty() const noexcept {
+inline bool Sequence<type>::isEmpty() const noexcept {
 	return size == 0;
 }
 
 template <class type>
-bool Sequence<type>::isFull() const noexcept {
+inline bool Sequence<type>::isFull() const noexcept {
 	return size == capacity;
 }
 
@@ -302,7 +302,7 @@ Sequence<type>& Sequence<type>::insertAt(size_t index, const type& value) {
 }
 
 template <class type>
-Sequence<type>& Sequence<type>::pop_back() noexcept {
+inline Sequence<type>& Sequence<type>::pop_back() noexcept {
 	if (size > 0)
 	{
 		size--;
@@ -316,15 +316,16 @@ Sequence<type>& Sequence<type>::pop_front() noexcept {
 }
 
 template<class type>
-type& Sequence<type>::at(size_t index) {
+inline type& Sequence<type>::at(size_t index) {
 	if (index >= size) {
 		throw std::out_of_range("Index out of range");
 	}
 
 	return elements[index];
 }
+
 template<class type>
-const type& Sequence<type>::at(size_t index) const {
+inline const type& Sequence<type>::at(size_t index) const {
 	if (index >= size) {
 		throw std::out_of_range("Index out of range");
 	}
@@ -457,7 +458,7 @@ void swap(Sequence<type>& a, Sequence<type>& b) noexcept {
 }
 
 template<class type>
-Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), size(other.size), capacity(other.capacity),
+inline Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), size(other.size), capacity(other.capacity),
       capacityGrowthStep(other.capacityGrowthStep) {
 	other.elements = nullptr;
 	other.size = 0;
@@ -506,7 +507,7 @@ Sequence<type>& Sequence<type>::operator+=(const Sequence<type>& other) {
 }
 
 template <class type>
-void Sequence<type>::setCapacityGrowthStep(size_t step) noexcept {
+inline void Sequence<type>::setCapacityGrowthStep(size_t step) noexcept {
 	if (step == 0)
 	{
 		capacityGrowthStep = 1;
@@ -516,7 +517,7 @@ void Sequence<type>::setCapacityGrowthStep(size_t step) noexcept {
 }
 
 template <class type>
-size_t Sequence<type>::getCapacityGrowthStep() const noexcept {
+inline size_t Sequence<type>::getCapacityGrowthStep() const noexcept {
 	return capacityGrowthStep;
 }
 
