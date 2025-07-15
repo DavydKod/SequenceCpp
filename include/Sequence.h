@@ -10,10 +10,10 @@ private:
 	size_t size;
 	size_t capacity;
 	type* elements = nullptr;
-	size_t capacityGrowthStep = 100;
+	size_t capacityGrowthStep = 100;//always greater than 0
 public:
-	Sequence(size_t capacity = 100);
-	Sequence(const type* elems, const size_t size, size_t capacity = 100);
+	Sequence(size_t capacity = 100, size_t capacityGrowthStep = 100);
+	Sequence(const type* elems, const size_t size, size_t capacity = 100,size_t capacityGrowthStep = 100);
 	Sequence(const Sequence<type>&);
 	Sequence(Sequence&&) noexcept;
 	~Sequence() noexcept;
@@ -65,7 +65,7 @@ public:
 };
 
 template <class type>
-Sequence<type>::Sequence(const type* elems, const size_t size, size_t capacity) : size(size), capacity(capacity) {
+Sequence<type>::Sequence(const type* elems, const size_t size, size_t capacity, size_t step) : size(size), capacityGrowthStep(step), capacity(capacity) {
 	if (size > capacity) {
 		throw std::invalid_argument("Sequence constructor: size cannot be greater than capacity");
 	}
@@ -78,7 +78,8 @@ Sequence<type>::Sequence(const type* elems, const size_t size, size_t capacity) 
 }
 
 template <class type>
-Sequence<type>::Sequence(size_t capacity) : capacity(capacity), size(0) {
+Sequence<type>::Sequence(size_t capacity, size_t capacityGrowthStep) : capacity(capacity),
+           capacityGrowthStep(capacityGrowthStep), size(0) {
 	elements = new type[capacity];
 }
 
@@ -170,7 +171,9 @@ void Sequence<type>::clear() noexcept {
 }
 
 template <class type>
-Sequence<type>::Sequence(const Sequence<type>& other) : size(other.size), capacity(other.capacity) {
+Sequence<type>::Sequence(const Sequence<type>& other) : size(other.size), capacity(other.capacity), 
+           capacityGrowthStep(other.capacityGrowthStep)
+{
 	elements = new type[capacity];
 
 	for (size_t i = 0; i < size; i++) {
@@ -184,6 +187,7 @@ Sequence<type>& Sequence<type>::operator=(const Sequence<type>& other) {
 		delete[] elements;
 		capacity = other.getCapacity();
 		size = other.getSize();
+		capacityGrowthStep = other.capacityGrowthStep;
 		elements = new type[capacity];
 		for (size_t i = 0; i < size; i++)
 		{
@@ -201,10 +205,12 @@ Sequence<type>& Sequence<type>::operator=(Sequence<type>&& other) noexcept {
 		elements = other.elements;
 		size = other.size;
 		capacity = other.capacity;
+		capacityGrowthStep = other.capacityGrowthStep;
 
 		other.elements = nullptr;
 		other.size = 0;
 		other.capacity = 0;
+		other.capacityGrowthStep = 1;
 	}
 	return *this;
 }
@@ -435,6 +441,10 @@ void Sequence<type>::swap(Sequence<type>& other) noexcept {
 	size_t savedCapacity = getCapacity();
 	capacity = other.getCapacity();
 	other.capacity = savedCapacity;
+	
+	size_t savedStep = getCapacityGrowthStep();
+	capacityGrowthStep = other.getCapacityGrowthStep();
+	other.capacityGrowthStep = savedStep;
 
 	type* savedElements = elements;
 	elements = other.elements;
@@ -447,10 +457,12 @@ void swap(Sequence<type>& a, Sequence<type>& b) noexcept {
 }
 
 template<class type>
-Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), size(other.size), capacity(other.capacity) {
+Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.elements), size(other.size), capacity(other.capacity),
+      capacityGrowthStep(other.capacityGrowthStep) {
 	other.elements = nullptr;
 	other.size = 0;
 	other.capacity = 0;
+	other.capacityGrowthStep = 1;
 }
 
 template <class type>
@@ -495,6 +507,11 @@ Sequence<type>& Sequence<type>::operator+=(const Sequence<type>& other) {
 
 template <class type>
 void Sequence<type>::setCapacityGrowthStep(size_t step) noexcept {
+	if (step == 0)
+	{
+		capacityGrowthStep = 1;
+		return;
+	}
 	capacityGrowthStep = step;
 }
 

@@ -34,7 +34,7 @@ void testEmpty() {
 	assert(seq.isEmpty());
 }
 
-void testPushingPopping() {
+void testPushingPoppingBack() {
 	Sequence<int> seq;
 	seq.push_back(5).push_back(12).push_back(654).push_back(23);
 	assert(seq[0] == 5);
@@ -107,7 +107,12 @@ void testPushingOutOfRangeOfCapacity() {
 	Sequence<int> seq(2);
 	assert(seq.getCapacity() == 2);
 	seq.push_back(5).push_back(12).push_back(654).push_back(23).push_back(234);
-	assert(seq.getCapacity() == 102);
+	assert(seq.back() == 234 && seq.getCapacity() == 102);
+
+	Sequence<int> seqA(2);
+	assert(seqA.getCapacity() == 2);
+	seqA.push_front(5).push_front(12).push_front(654);
+	assert(seqA.front() == 654 && seqA.getCapacity() == 102);
 }
 
 void testContaining() {
@@ -371,12 +376,98 @@ void testPushingArray() {
 	assert(seq.getSize() == 128 && seq.getCapacity() == 228);
 }
 
+void testFrontBack() {
+	Sequence<int> seq(10, 25);
+	seq.push_back(new int[] {1, 5, 6, 7}, 4);
+
+	assert(seq.front() == 1);
+	assert(seq.back() == 7);
+	assert(seq.removeAt(0).front() == 5);
+	seq.front() = 2;
+	seq.back() = 3;
+	assert(seq.front() == 2);
+	assert(seq.back() == 3);
+	const Sequence<int> sequence(new int[] {3}, 1, 2, 10);
+	assert(sequence.front() == sequence.back());
+}
+
+void testCapacityGrowthStep() {
+	Sequence<double> seq(1, 2);
+	assert(seq.getCapacityGrowthStep() == 2);
+	seq.push_back(2);
+	assert(seq.getCapacity() == 1);
+	seq.push_front(2);
+	assert(seq.getCapacity() == 3);
+	seq.setCapacityGrowthStep(5);
+	seq.push_back(2).push_back(6);
+	assert(seq.getCapacity() == 8);
+	seq.setCapacityGrowthStep(0);
+	assert(seq.getCapacityGrowthStep() == 1);
+}
+
+void testFull() {
+	Sequence<double> seq(1, 2);
+	seq.push_front(2);
+	assert(seq.isFull());
+	seq.push_back(2);
+	assert(!seq.isFull());
+	seq.push_front(3.5);
+	assert(seq.isFull());
+}
+
+void testFind() {
+	const Sequence<int> seq(new int[] {3, 7, 3, 3, 5, 5, 8, 7, 9, 9, 0}, 11, 11, 10);
+	assert(seq.find(3) == 0);
+	assert(seq.find(5) == 4);
+	assert(seq.find(34) == 11);
+
+	assert(seq.findFirst(3) == 0);
+	assert(seq.findFirst(5) == 4);
+	assert(seq.findFirst(34) == 11);
+
+	assert(seq.findLast(3) == 3);
+	assert(seq.findLast(5) == 5);
+	assert(seq.findLast(34) == 11);
+
+	assert(seq.findFirst(0) == seq.findLast(0));
+}
+
+void testConcatination() {
+	Sequence<int> seqA(new int[] {3, 7, 3, 3, 5, 5, 8, 7, 9, 9, 0}, 11, 11, 10);
+	const Sequence<int> seqB(new int[] {9, 0}, 2, 11, 10);
+	const Sequence<int> seqC;
+	seqA.concat(seqB);
+	assert(seqA.getSize() == 13);
+	assert(seqA.front() == 3 && seqA.back() == 0);
+	Sequence<int> seqD = seqA + seqB + seqC + seqA;
+	assert(seqD.getSize() == 28);
+	seqA += seqD;
+	seqD.clear();;
+	assert(seqA.getSize() == 41);
+	assert(seqA.front() == 3 && seqA.back() == 0);
+
+}
+
+void testPushingAndPoppingFront() {
+	Sequence<int> seq(10, 20);
+	seq.push_front(45);
+	assert(seq.at(0) == 45);
+	seq.push_back(4);
+	assert(seq.at(0) == 45);
+	seq.push_front(0);
+	assert(seq.at(0) == 0 && seq.at(1) == 45);
+	assert(seq.getSize() == 3);
+	seq.pop_front();
+	assert(seq.at(0) == 45 && seq.getSize() == 2);
+}
+
 size_t testBasics() {
 	size_t passedTests = 0;
 
 	runTest(testCreation, passedTests);
 	runTest(testEmpty, passedTests);
-	runTest(testPushingPopping, passedTests);
+	runTest(testFull, passedTests);
+	runTest(testPushingPoppingBack, passedTests);
 	runTest(testPrinting, passedTests);
 	runTest(testChanging, passedTests);
 	runTest(testClearing, passedTests);
@@ -393,6 +484,11 @@ size_t testBasics() {
 	runTest(testGetting, passedTests);
 	runTest(testMoveSemantics, passedTests);
 	runTest(testPushingArray, passedTests);
+	runTest(testFrontBack, passedTests);
+	runTest(testCapacityGrowthStep, passedTests);
+	runTest(testPushingAndPoppingFront, passedTests);
+	runTest(testFind, passedTests);
+	runTest(testConcatination, passedTests);
 
 	return passedTests;
 }
