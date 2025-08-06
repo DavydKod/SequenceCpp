@@ -10,7 +10,7 @@ private:
 	size_t size;
 	size_t capacity;
 	type* elements = nullptr;
-	size_t capacityGrowthStep = 100;//always greater than 0
+	size_t capacityGrowthStep = 100;//not NULL
 public:
 	Sequence(size_t capacity = 100, size_t capacityGrowthStep = 100);
 	Sequence(const type* elems, const size_t size, size_t capacity = 100,size_t capacityGrowthStep = 100);
@@ -41,6 +41,8 @@ public:
 	Sequence<type>& push_back(const Sequence<type>&);
 	Sequence<type>& push_back(const type*, size_t);
 	Sequence<type>& push_front(const type&);
+	Sequence<type>& push_front(const Sequence<type>&);
+	Sequence<type>& push_front(const type*, size_t);
 	Sequence<type>& pop_back() noexcept;
 	Sequence<type>& pop_front() noexcept;
 	Sequence<type>& insertAt(size_t index, const type& value);
@@ -469,7 +471,7 @@ inline Sequence<type>::Sequence(Sequence&& other) noexcept: elements(other.eleme
 template <class type>
 Sequence<type>& Sequence<type>::push_back(const Sequence<type>& other) {
 	size_t otherSize = other.size;
-	reserve((size + other.size >= capacity) ? size + other.size + capacityGrowthStep : size + other.size);
+	reserve((size + otherSize >= capacity) ? size + otherSize + capacityGrowthStep : size + otherSize);
 
 	for (size_t i = 0; i < otherSize; ++i) {
 		elements[size++] = other.elements[i];
@@ -484,6 +486,37 @@ Sequence<type>& Sequence<type>::push_back(const type* array, size_t arraySize) {
 
 	for (size_t i = 0; i < arraySize; ++i) {
 		elements[size++] = array[i];
+	}
+
+	return *this;
+}
+
+template<class type>
+Sequence<type>& Sequence<type>::push_front(const Sequence<type>& other) {
+	size_t otherSize = other.size;
+	reserve((size + otherSize >= capacity) ? size + otherSize + capacityGrowthStep : size + otherSize);
+	size += otherSize;
+
+	for (size_t i = size + otherSize - 1; i >= size - otherSize; i--) {
+		elements[i] = elements[i - otherSize];
+	}
+	for (size_t i = 0; i < otherSize; i++) {
+		elements[i] = other[i];
+	}
+
+	return *this;
+}
+
+template<class type>
+Sequence<type>& Sequence<type>::push_front(const type* other, size_t otherSize) {
+	reserve((size + otherSize >= capacity) ? size + otherSize + capacityGrowthStep : size + otherSize);
+	size += otherSize;
+
+	for (size_t i = size + otherSize - 1; i >= size - otherSize; i--) {
+		elements[i] = elements[i - otherSize];
+	}
+	for (size_t i = 0; i < otherSize; i++) {
+		elements[i] = other[i];
 	}
 
 	return *this;

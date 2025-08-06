@@ -152,11 +152,9 @@ void testComparisonOperator() {
 }
 
 size_t testOperators() {
-	size_t passedTests = 0;
-	runTest(testIndexOperator, passedTests);
-	runTest(testAssignmentOperator, passedTests);
-	runTest(testOutputOperator, passedTests);
-	runTest(testInputOperator, passedTests);
-	runTest(testComparisonOperator, passedTests);
-	return passedTests;
+	runTest(testAssignmentOperator);
+	runTest(testOutputOperator);
+	runTest(testInputOperator);
+	runTest(testComparisonOperator);
+	return runTest(testIndexOperator);
 }

@@ -2,6 +2,18 @@
 #include "runTestMethods.h"
 #include "cassert"
 #include <sstream>
+#include <functional>
+
+template <class type, class Func, class... Args>
+bool tryCall(Sequence<type>& seq, Func&& func, Args&&... args) {
+	try {
+		std::invoke(std::forward<Func>(func), seq, std::forward<Args>(args)...);
+	}
+	catch (std::out_of_range&) {
+		return false;
+	}
+	return true;
+}
 
 void testCreation() {
 	Sequence<int> seq;
@@ -23,6 +35,8 @@ void testCreation() {
 		exceptionThrown = true;
 	}
 	assert(exceptionThrown);
+
+	delete[] elements;
 }
 
 void testEmpty() {
@@ -73,23 +87,8 @@ void testChanging() {
 	seq.changeAll(5, 10);
 	assert(seq[0] == 10 && seq[5] == 10 && seq[7] == 10);
 
-	bool outOfRange = false;
-	try {
-		seq.changeAt(-55, 2);
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
-	outOfRange = false;
-
-	try {
-		seq.changeAt(65, 2);
-	}
-	catch (const std::out_of_range&) {
-		outOfRange = true;
-	}
-	assert(outOfRange);
+	assert(!tryCall(seq, &Sequence<int>::changeAt, -55, 2));
+	assert(!tryCall(seq, &Sequence<int>::changeAt, -65, 2));
 }
 
 void testClearing() {
@@ -197,17 +196,6 @@ void testReserving() {
 	assert(seq.getCapacity() == 56);
 }
 
-template<class type>
-bool tryInsert(Sequence<type>& seq, size_t index, const type& value) {
-	try {
-		seq.insertAt(index, value);
-	}
-	catch (const std::out_of_range&) {
-		return false;
-	}
-	return true;
-}
-
 void testInserting() {
 	Sequence<int> seq(10);
 	seq.push_back(7).push_back(12).push_back(654).push_back(23).push_back(234).push_back(5).push_back(4).push_back(5);
@@ -223,8 +211,8 @@ void testInserting() {
 	seq.insertAt(6, 1);
 	assert(seq.getCapacity() == 110);
 
-	assert(!tryInsert(seq, -57, 58));
-	assert(!tryInsert(seq, 254, 8));
+	assert(!tryCall(seq, &Sequence<int>::insertAt, -57, 58));
+	assert(!tryCall(seq, &Sequence<int>::insertAt, 254, 8));
 	
 	assert(seq.getCapacity() == 110);
 	assert(seq.getSize() == 11);
@@ -232,17 +220,6 @@ void testInserting() {
 
 	seq.insertAt(0, 66).insertAt(1, 4).insertAt(2, 60);
 	assert(seq.getSize() == 3 && seq.at(0) == 66 && seq.at(2) == 60);
-}
-
-template<class type>
-bool tryRemove(Sequence<type>& seq, size_t index) {
-	try {
-		seq.removeAt(index);
-	}
-	catch (const std::out_of_range&) {
-		return false;
-	}
-	return true;
 }
 
 void testRemoving() {
@@ -260,8 +237,8 @@ void testRemoving() {
 	seq.removeAll(5).removeAll(654).removeAll(2).removeAll(4);
 	assert(seq[0] == 12 && seq[1] == 23 && seq[2] == 234 && seq.getSize() == 3);
 	
-	assert(!tryRemove(seq, -6));
-	assert(!tryRemove(seq, 87));
+	assert(!tryCall(seq, &Sequence<int>::removeAt, -6));
+	assert(!tryCall(seq, &Sequence<int>::removeAt, 87));
 	
 	seq.removeAll(23).removeAt(0).removeAt(0);
 	
@@ -322,17 +299,6 @@ void testSwap() {
 	assert(seq[0] == 2 && sequence[2] == 654 && seq[3] == 87);
 }
 
-template<class type>
-bool tryAt(Sequence<type>& seq, size_t index) {
-	try {
-		seq.at(index);
-	}
-	catch (const std::out_of_range&) {
-		return false;
-	}
-	return true;
-}
-
 void testGetting() {
 	Sequence<int> seq(6);
 	seq.push_back(2).push_back(42).push_back(1).push_back(8);
@@ -341,8 +307,8 @@ void testGetting() {
 	seq.at(3) = 1;
 	assert(seq.at(3) == 1);
 
-	assert(!tryAt(seq, -1));
-	assert(!tryAt(seq, 4));
+	assert(!tryCall(seq, static_cast<int& (Sequence<int>::*)(size_t)>(&Sequence<int>::at), -1));
+	assert(!tryCall(seq, static_cast<int& (Sequence<int>::*)(size_t)>(&Sequence<int>::at), 4));
 }
 
 template <class type>
@@ -461,34 +427,65 @@ void testPushingAndPoppingFront() {
 	assert(seq.at(0) == 45 && seq.getSize() == 2);
 }
 
+void testPushingFrontSequences() {
+	Sequence<int> a(new int[]{ 2, 4, 5 }, 3);
+	int* b = new int[] {2, 1, 5, 6};
+	a.push_front(b, 4);
+	assert(a[0] == 2 && a[5] == 4 && a[6] == 5 && a.getSize() == 7);
+	a.push_front(a);
+	assert(a[0] == 2 && a[13] == 5 && a.getSize() == 14);
+	a.push_front(b, 4);
+	assert(a[0] == 2 && a[1] == 1 && a[14] == 6 && a[15] == 2 && a[16] == 4 && a[17] == 5 && a.getSize() == 18);
+
+	Sequence<bool> c(new bool[] {false}, 1, 2, 10);
+	bool* d = new bool[] {true, false};
+	c.push_front(d, 2);
+	assert(c[0] == true && c[1] == false && c[2] == false && c.getSize() == 3 && c.getCapacity() == 13);
+	c.push_front(Sequence<bool>());
+	assert(c[0] == true && c[1] == false && c[2] == false && c.getSize() == 3 && c.getCapacity() == 13);
+	delete[] b;
+	delete[] d;
+}
+
+void testPushingFrontArrays() {
+	Sequence<int> a(new int[] { 2, 4, 5 }, 3);
+	Sequence<int> b(new int[] { 2, 1, 5, 6 }, 4);
+	a.push_front(b);
+	assert(a[0] == 2 && a[5] == 4 && a[6] == 5 && a.getSize() == 7);
+	a.push_front(a);
+	assert(a[0] == 2 && a[13] == 5 && a.getSize() == 14);
+	a.push_front(b);
+	assert(a[0] == 2 && a[1] == 1 && a[14] == 6 && a[15] == 2 && a[16] == 4 && a[17] == 5 && a.getSize() == 18);
+}
+
 size_t testBasics() {
-	size_t passedTests = 0;
 
-	runTest(testCreation, passedTests);
-	runTest(testEmpty, passedTests);
-	runTest(testFull, passedTests);
-	runTest(testPushingPoppingBack, passedTests);
-	runTest(testPrinting, passedTests);
-	runTest(testChanging, passedTests);
-	runTest(testClearing, passedTests);
-	runTest(testPushingOutOfRangeOfCapacity, passedTests);
-	runTest(testContaining, passedTests);
-	runTest(testShrinking, passedTests);
-	runTest(testResizing, passedTests);
-	runTest(testReserving, passedTests);
-	runTest(testRemoving, passedTests);
-	runTest(testInserting, passedTests);
-	runTest(testCopying, passedTests);
-	runTest(testConstObjects, passedTests);
-	runTest(testSwap, passedTests);
-	runTest(testGetting, passedTests);
-	runTest(testMoveSemantics, passedTests);
-	runTest(testPushingArray, passedTests);
-	runTest(testFrontBack, passedTests);
-	runTest(testCapacityGrowthStep, passedTests);
-	runTest(testPushingAndPoppingFront, passedTests);
-	runTest(testFind, passedTests);
-	runTest(testConcatination, passedTests);
+	runTest(testEmpty);
+	runTest(testFull);
+	runTest(testPushingPoppingBack);
+	runTest(testPrinting);
+	runTest(testChanging);
+	runTest(testClearing);
+	runTest(testPushingOutOfRangeOfCapacity);
+	runTest(testContaining);
+	runTest(testShrinking);
+	runTest(testResizing);
+	runTest(testReserving);
+	runTest(testRemoving);
+	runTest(testInserting);
+	runTest(testCopying);
+	runTest(testConstObjects);
+	runTest(testSwap);
+	runTest(testGetting);
+	runTest(testMoveSemantics);
+	runTest(testPushingArray);
+	runTest(testFrontBack);
+	runTest(testCapacityGrowthStep);
+	runTest(testPushingAndPoppingFront);
+	runTest(testFind);
+	runTest(testConcatination);
+	runTest(testPushingFrontSequences);
+	runTest(testPushingFrontArrays);
 
-	return passedTests;
+	return runTest(testCreation);
 }

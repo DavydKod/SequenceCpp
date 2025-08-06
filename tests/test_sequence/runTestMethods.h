@@ -2,9 +2,10 @@
 #define RUN_TEST_METHODS_H
 
 template <class Func>
-void runTest(Func func, size_t& passedTests) {
+size_t runTest(Func func) {
+	static size_t passedTests = 0;
 	func();
-	++passedTests;
+	return ++passedTests;
 }
 
 #endif
