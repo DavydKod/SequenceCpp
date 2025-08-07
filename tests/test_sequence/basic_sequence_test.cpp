@@ -458,8 +458,14 @@ void testPushingFrontArrays() {
 	assert(a[0] == 2 && a[1] == 1 && a[14] == 6 && a[15] == 2 && a[16] == 4 && a[17] == 5 && a.getSize() == 18);
 }
 
-size_t testBasics() {
+void testSizeInBytes() {
+	Sequence<int> seq(new int[] { 2, 4, 5, 5, 8 }, 5, 150, 10);
+	assert(seq.dataSizeInBytes() == 600 && seq.totalSizeInBytes() == 632);
+	seq.reserve(200);
+	assert(seq.dataSizeInBytes() == 800 && seq.totalSizeInBytes() == 832);
+}
 
+size_t testBasics() {
 	runTest(testEmpty);
 	runTest(testFull);
 	runTest(testPushingPoppingBack);
@@ -486,6 +492,7 @@ size_t testBasics() {
 	runTest(testConcatination);
 	runTest(testPushingFrontSequences);
 	runTest(testPushingFrontArrays);
+	runTest(testSizeInBytes);
 
 	return runTest(testCreation);
 }

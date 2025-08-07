@@ -55,6 +55,8 @@ public:
 	[[nodiscard]] const type& at(size_t) const;
 	void print() const;
 	void swap(Sequence<type>&) noexcept;
+	[[nodiscard]] size_t totalSizeInBytes() const;
+	[[nodiscard]] size_t dataSizeInBytes() const;
 
 	[[nodiscard]] type& operator[] (size_t);
 	[[nodiscard]] const type& operator[] (size_t) const;
@@ -575,6 +577,16 @@ size_t Sequence<type>::findLast(const type& value) const noexcept(noexcept(std::
 		if (value == elements[i]) { return i; }
 	}
 	return size;
+}
+
+template <class type>
+[[nodiscard]] size_t Sequence<type>::totalSizeInBytes() const {
+	return sizeof(type) * capacity + sizeof(capacity) + sizeof(size) + sizeof(capacityGrowthStep) + sizeof(elements);
+}
+
+template <class type>
+[[nodiscard]] size_t Sequence<type>::dataSizeInBytes() const {
+	return sizeof(type) * capacity;
 }
 
 #endif
